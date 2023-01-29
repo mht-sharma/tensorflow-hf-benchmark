@@ -1,7 +1,10 @@
 import random
+import re
+import subprocess
 import tempfile
 import time
 
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 import torch
@@ -13,7 +16,6 @@ def set_seed(seed: int = 42) -> None:
     torch.manual_seed(seed)
     tf.random.set_seed(seed)
     tf.experimental.numpy.random.seed(seed)
-    tf.set_random_seed(seed)
 
 
 set_seed()
@@ -33,7 +35,7 @@ def measure_latency(test_model, encoded_input, warmup_runs=10, num_runs=100):
     # Compute run statistics
     time_avg_ms = 1000 * np.mean(latencies)
     time_std_ms = 1000 * np.std(latencies)
-    return f"Average latency (ms) - {time_avg_ms:.2f} +\- {time_std_ms:.2f}"
+    return time_avg_ms, time_std_ms
 
 
 def random_int_tensor(shape, max_value: int, min_value: int = 0, framework: str = "tf"):
@@ -52,7 +54,7 @@ def generate_input(
     return random_int_tensor(shape, max_value, min_value=min_value, framework=framework)
 
 
-def model_to_signatures(model, input_shape, **model_kwargs):
+def model_to_signatures(model, input_shape=[1, 8], **model_kwargs):
     input_names = ["input_ids", "attention_mask", "token_type_ids"]
     output_names = ["logits"]
 
@@ -83,24 +85,28 @@ def model_to_signatures(model, input_shape, **model_kwargs):
     return {"model": function}
 
 
-def convert_keras_to_tflite(
-    model, output_path=None, quantize_fp16=False, quantize_weights=False
+def convert_model_to_tflite(
+    model,
+    input_shape=[1, 8],
+    output_path=None,
+    quantize_fp16=False,
+    quantize_weights=False,
 ):
 
-    signatures = model_to_signatures(model)
+    signatures = model_to_signatures(model, input_shape=input_shape)
 
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         tf.saved_model.save(model, tmp_dir_name, signatures)
         converter = tf.lite.TFLiteConverter.from_saved_model(tmp_dir_name)
 
-    if quantize_weights:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+        if quantize_weights:
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
-    if quantize_fp16:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.target_spec.supported_types = [tf.float16]
+        if quantize_fp16:
+            converter.optimizations = [tf.lite.Optimize.DEFAULT]
+            converter.target_spec.supported_types = [tf.float16]
 
-    tflite_model = converter.convert()
+        tflite_model = converter.convert()
 
     if output_path is not None:
         print("Writing tensorflow lite model to: %s" % output_path)
@@ -112,3 +118,43 @@ def convert_keras_to_tflite(
     runner = interpreter.get_signature_runner("model")
 
     return runner
+
+
+def run_tflite_benchmark(
+    benchmark_binary_path,
+    tflite_model_path,
+    num_threads,
+    warmup_runs,
+    num_runs,
+    use_xnnpack,
+):
+    cmd = (
+        f"{benchmark_binary_path} --graph={tflite_model_path} "
+        f"--num_threads={num_threads} --warmup_runs={warmup_runs} "
+        f"--num_runs={num_runs} --use_xnnpack={use_xnnpack}"
+    )
+
+    result = subprocess.run(
+        cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    ).stdout.decode("utf-8")
+
+    result = result.split("\n")[-4]
+
+    time_avg_ms = float(re.findall(r"[-+]?(?:\d*\.\d+|\d+)", result)[-1]) / 1000
+
+    return time_avg_ms
+
+
+def plot_latency(model_name, latencies):
+    desc = list(latencies.keys())
+    values = list(latencies.values())
+
+    x = 1
+    for i in range(len(values)):
+        plt.bar(x, values[i], width=0.4)
+        x += 0.5
+
+    plt.ylabel("Latency (ms)")
+    plt.title(f"{model_name} CPU benchmark")
+    plt.legend(desc)
+    plt.savefig(f"{model_name}_benchmark.png")
