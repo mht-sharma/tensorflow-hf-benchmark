@@ -38,7 +38,7 @@ The results presented are computed on **AWS C6I.X8large** EC2 instance
 | Pytorch | 10.63 |
 
 <p>
-  <img src="plots/bert-base-cased_benchmark.png" width=500>
+  <img src="plots/bert-base-cased_benchmark.png" width=480>
 </p>
 
 
@@ -58,7 +58,7 @@ The results presented are computed on **AWS C6I.X8large** EC2 instance
 
 
 <p>
-  <img src="plots/bert-large-cased_benchmark.png" width=500>
+  <img src="plots/bert-large-cased_benchmark.png" width=480>
 </p>
 
 -------------------------
