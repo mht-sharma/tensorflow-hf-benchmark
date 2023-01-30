@@ -49,13 +49,13 @@ def random_int_tensor(shape, max_value: int, min_value: int = 0, framework: str 
 def generate_input(
     input_name: str, framework: str = "tf", shape=[1, 8], vocab_size=100
 ):
-    min_value = 0
+    min_value = 1
     max_value = 2 if input_name != "input_ids" else vocab_size
     return random_int_tensor(shape, max_value, min_value=min_value, framework=framework)
 
 
 def model_to_signatures(model, input_shape=[1, 8], **model_kwargs):
-    input_names = ["input_ids", "attention_mask", "token_type_ids"]
+    input_names = ["input_ids", "attention_mask"]
     output_names = ["logits"]
 
     def forward(*args):
@@ -155,6 +155,6 @@ def plot_latency(model_name, latencies):
         x += 0.5
 
     plt.ylabel("Latency (ms)")
-    plt.title(f"{model_name} CPU benchmark")
+    plt.title(f"{model_name.replace('/', '-')} CPU benchmark")
     plt.legend(desc)
-    plt.savefig(f"{model_name}_benchmark.png")
+    plt.savefig(f"{model_name.replace('/', '-')}_benchmark.png")

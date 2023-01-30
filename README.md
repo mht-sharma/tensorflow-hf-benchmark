@@ -12,8 +12,8 @@ Supported Features of TensorFlow Hugging Face Benchmarks Repository
 * Benchmarks for **TensorFlow Lite without XNNPACK**
 
 ## Todo
-[] Quantization benchmarks
-[] Pruning tensorflow models using INC
+* [ ] Quantization benchmarks
+* [ ] Pruning tensorflow models using INC
 
 ## Installation
 
@@ -22,39 +22,51 @@ TBA
 ## Results
 The results presented are computed on **AWS C6I.X8large** EC2 instance
 
-### Bert base
+### 1. Bert base
+-------------------------
+
 
 | Description | Latency (ms) |
 | --- | --- |
-| Tensorflow Eager  | 115.92 |
-| Tensorflow Graph (XLA) | 17.89 |
-| TFLite (Python) | 69.86 |
-| TFLite wout XNNPack (Bench. Tool) | 78.83 |
-| TFLite XNNPack (Bench. Tool) Threads (1) | 50.74|
-| TFLite XNNPack (Bench. Tool) Threads (8) | 12.59 |
-| TFLite XNNPack (Bench. Tool) Threads (16) | 10.98 |
-| Pytorch | 10.25 |
+| Tensorflow Eager  | 95.13 |
+| Tensorflow Graph (XLA) | 22.55 |
+| TFLite (Python) | 50.18 |
+| TFLite wout XNNPack (Bench. Tool) | 78.94 |
+| TFLite XNNPack (Bench. Tool) Threads (1) | 50.18|
+| TFLite XNNPack (Bench. Tool) Threads (8) | 12.32 |
+| TFLite XNNPack (Bench. Tool) Threads (16) | 10.47 |
+| Pytorch | 10.63 |
 
-![Models Latency Plot](plots/bert-base-cased_benchmark.png)
+<p>
+  <img src="plots/bert-base-cased_benchmark.png" width=400>
+</p>
 
-### Bert large
+
+### 2. Bert large
+-------------------------
 
 | Description | Latency (ms) |
 | --- | --- |
-| Tensorflow Eager  | 234.37 |
-| Tensorflow Graph (XLA) | 45.63 |
-| TFLite (Python) | 303.57 |
-| TFLite wout XNNPack (Bench. Tool) | 312.27 |
-| TFLite XNNPack (Bench. Tool) Threads (1) | 191.22|
-| TFLite XNNPack (Bench. Tool) Threads (8) | 39.53 |
-| TFLite XNNPack (Bench. Tool) Threads (16) | 31.04 |
-| Pytorch | 27.35 |
+| Tensorflow Eager  | 193.38 |
+| Tensorflow Graph (XLA) | 53.64 |
+| TFLite (Python) | 241.51 |
+| TFLite wout XNNPack (Bench. Tool) | 314.21 |
+| TFLite XNNPack (Bench. Tool) Threads (1) | 187.17|
+| TFLite XNNPack (Bench. Tool) Threads (8) | 40.05 |
+| TFLite XNNPack (Bench. Tool) Threads (16) | 31.11 |
+| Pytorch | 28.65 |
 
-![Models Latency Plot](plots/bert-large-cased_benchmark.png)
+
+<p align="center">
+  <img src="plots/bert-large-cased_benchmark.png" width=500>
+</p>
+
+-------------------------
+
 
 ## Tensorflow Model Optimization Limitations
 The section mentions the limitations of the features mentioned in [https://www.tensorflow.org/model_optimization](https://www.tensorflow.org/model_optimization) as well as other shortcomings.
 
 * [**Pruning**](https://www.tensorflow.org/model_optimization/guide/pruning) - The pruning currently doesn't support subclassed tensorflow models.
 For subclass models, since keras doesn't support cloning, it still don't have a model-level API. Alternative is to re-construct the model and wrapper the layers to prune with the pruning API. See [tensorflow/model-optimization/issues/155](https://github.com/tensorflow/model-optimization/issues/155) for more information.
-* [**TFLite Python Support (Num threads)**] - Mulithreaded execution have significant performance gains in some scenarios. However, setting `num_threads` in Python interpreter does not work. See [tensorflow/tensorflow/issues/52076](https://github.com/tensorflow/tensorflow/issues/52076) for more information.
+* **TFLite Python Support (Num threads)** - Mulithreaded execution have significant performance gains in some scenarios. However, setting `num_threads` in Python interpreter does not work. See [tensorflow/tensorflow/issues/52076](https://github.com/tensorflow/tensorflow/issues/52076) for more information.

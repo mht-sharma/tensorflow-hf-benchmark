@@ -8,11 +8,18 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-from transformers import (AutoModelForSequenceClassification,
-                          TFAutoModelForSequenceClassification)
+from transformers import (
+    AutoModelForSequenceClassification,
+    TFAutoModelForSequenceClassification,
+)
 
-from utils import (convert_model_to_tflite, generate_input, measure_latency,
-                   plot_latency, run_tflite_benchmark)
+from utils import (
+    convert_model_to_tflite,
+    generate_input,
+    measure_latency,
+    plot_latency,
+    run_tflite_benchmark,
+)
 
 
 def argparser():
@@ -84,7 +91,7 @@ def main(
 ):
     latencies = OrderedDict()
 
-    input_names = ["input_ids", "attention_mask", "token_type_ids"]
+    input_names = ["input_ids", "attention_mask"]
     input_shape = [batch_size, sequence_length]
 
     model_tf = TFAutoModelForSequenceClassification.from_pretrained(model_name)
