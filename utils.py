@@ -129,13 +129,16 @@ def run_tflite_benchmark(
     use_xnnpack,
 ):
     cmd = (
+        f"numactl -C 0-{num_threads-1} "
         f"{benchmark_binary_path} --graph={tflite_model_path} "
         f"--num_threads={num_threads} --warmup_runs={warmup_runs} "
         f"--num_runs={num_runs} --use_xnnpack={use_xnnpack}"
     )
 
     result = subprocess.run(
-        cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        cmd.split(" "),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
     ).stdout.decode("utf-8")
 
     result = result.split("\n")[-4]

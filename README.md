@@ -22,7 +22,7 @@ TBA
 ## Results
 The results presented are computed on **AWS C6I.X8large** EC2 instance
 
-### 1. Bert base
+### 1. Bert base (BS 1 SL 8)
 -------------------------
 
 
@@ -42,7 +42,7 @@ The results presented are computed on **AWS C6I.X8large** EC2 instance
 </p>
 
 
-### 2. Bert large
+### 2. Bert large (BS 1 SL 8)
 -------------------------
 
 | Description | Latency (ms) |

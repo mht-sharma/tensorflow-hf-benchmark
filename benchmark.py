@@ -8,18 +8,11 @@ from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-from transformers import (
-    AutoModelForSequenceClassification,
-    TFAutoModelForSequenceClassification,
-)
+from transformers import (AutoModelForSequenceClassification,
+                          TFAutoModelForSequenceClassification)
 
-from utils import (
-    convert_model_to_tflite,
-    generate_input,
-    measure_latency,
-    plot_latency,
-    run_tflite_benchmark,
-)
+from utils import (convert_model_to_tflite, generate_input, measure_latency,
+                   plot_latency, run_tflite_benchmark)
 
 
 def argparser():
@@ -75,7 +68,7 @@ def argparser():
     return args
 
 
-def main(
+def benchmark(
     model_name,
     num_runs=100,
     warmup_runs=10,
@@ -101,7 +94,7 @@ def main(
         for input_name in input_names
     }
 
-    model_tf_graph = tf.function(model_tf, jit_compile=True)
+    model_tf_graph = tf.function(model_tf, jit_compile=False)
 
     time_avg_ms, time_std_ms = measure_latency(
         model_tf, input_tf, warmup_runs, num_runs
@@ -156,7 +149,7 @@ def main(
                     tflite_model_path,
                     num_thread,
                     warmup_runs,
-                    num_runs,
+                    1000,
                     use_xnnpack,
                 )
 
@@ -210,7 +203,7 @@ def main(
 
 if __name__ == "__main__":
     args = argparser()
-    main(
+    benchmark(
         args.model_name,
         args.num_runs,
         args.warmup_runs,
